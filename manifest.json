@@ -3,6 +3,8 @@
     "short_name": "milu",
     "start_url": "index.html",
     "display": "standalone",
+    "theme_color": "#ece0a8",
+    "background_color": "#ece0a8",
     "icons": [
         {
             "src": "icon192x192.png",
