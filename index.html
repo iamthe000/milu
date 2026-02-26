@@ -346,6 +346,28 @@ if ('serviceWorker' in navigator) {
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
             animation-delay: 0.5s;
         }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .modal-buttons .btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            min-width: 100px;
+        }
+
+        .modal-buttons .cancel {
+            background-color: #a8d5e2;
+        }
+
+        .modal-buttons .confirm {
+            background-color: #ffaaa5;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -384,6 +406,17 @@ if ('serviceWorker' in navigator) {
                 <li><span class="bunsetsu">他のアプリを</span><span class="bunsetsu">開いたら...？</span></li>
             </ul>
             <button id="close-modal-btn" class="btn">わかった！</button>
+        </div>
+    </div>
+
+    <div id="reset-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>リセットする？</h2>
+            <p>頑張った記録が<br>ゼロになっちゃうよ？</p>
+            <div class="modal-buttons">
+                <button id="cancel-reset-btn" class="btn cancel">やめとく</button>
+                <button id="confirm-reset-btn" class="btn confirm">リセット</button>
+            </div>
         </div>
     </div>
 
@@ -548,7 +581,29 @@ if ('serviceWorker' in navigator) {
 
         startBtn.addEventListener('click', startTimer);
         stopBtn.addEventListener('click', stopTimer);
-        resetBtn.addEventListener('click', resetTimer);
+
+        const resetModal = document.getElementById('reset-modal');
+        const cancelResetBtn = document.getElementById('cancel-reset-btn');
+        const confirmResetBtn = document.getElementById('confirm-reset-btn');
+
+        resetBtn.addEventListener('click', () => {
+            resetModal.classList.add('active');
+        });
+
+        const closeResetModal = () => {
+            resetModal.classList.remove('active');
+        };
+
+        cancelResetBtn.addEventListener('click', closeResetModal);
+
+        confirmResetBtn.addEventListener('click', () => {
+            resetTimer();
+            closeResetModal();
+        });
+
+        resetModal.addEventListener('click', (e) => {
+            if (e.target === resetModal) closeResetModal();
+        });
 
         const usageBtn = document.getElementById('usage-btn');
         const modal = document.getElementById('usage-modal');
