@@ -301,6 +301,16 @@ if ('serviceWorker' in navigator) {
             color: var(--accent-color);
         }
 
+        .bunsetsu {
+            display: inline-block;
+        }
+
+        .modal-content p.subtitle {
+            font-size: clamp(10px, 3.2vw, 16px);
+            white-space: nowrap;
+            margin-bottom: 20px;
+        }
+
         #close-modal-btn {
             background-color: var(--accent-color);
             margin-top: 15px;
@@ -366,12 +376,12 @@ if ('serviceWorker' in navigator) {
     <div id="usage-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>使い方</h2>
-            <p>勉強中スマホを触りたくなっちゃうあなたへ</p>
+            <p class="subtitle">勉強中スマホを触りたくなっちゃうあなたへ</p>
             <ul>
-                <li>画面中央で見守っているのはあなたの勉強を見守るあなたの素敵な相棒『milu』です</li>
-                <li>miluを開いたまま立てかけておいてね</li>
-                <li>ふとスマホを触ろうとしたらmiluと目が合うよ</li>
-                <li>他のアプリを開いたら...？</li>
+                <li><span class="bunsetsu">画面中央で</span><span class="bunsetsu">見守っているのは</span><span class="bunsetsu">あなたの勉強を</span><span class="bunsetsu">見守る</span><span class="bunsetsu">あなたの素敵な相棒</span><span class="bunsetsu">『milu』です</span></li>
+                <li><span class="bunsetsu">miluを開いたまま</span><span class="bunsetsu">立てかけておいてね</span></li>
+                <li><span class="bunsetsu">ふとスマホを</span><span class="bunsetsu">触ろうとしたら</span><span class="bunsetsu">miluと目が合うよ</span></li>
+                <li><span class="bunsetsu">他のアプリを</span><span class="bunsetsu">開いたら...？</span></li>
             </ul>
             <button id="close-modal-btn" class="btn">わかった！</button>
         </div>
