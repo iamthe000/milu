@@ -213,7 +213,7 @@ if ('serviceWorker' in navigator) {
         @media (max-width: 600px) {
             #face-container { transform: scale(0.7); }
             #time-display { font-size: 2rem; }
-            #timer-panel { width: 80%; }
+            #timer-panel { width: auto; max-width: 95%; }
         }
 
         #usage-btn {
@@ -353,7 +353,7 @@ if ('serviceWorker' in navigator) {
     <button id="usage-btn" class="btn">使い方</button>
 
     <div id="timer-panel">
-        <div id="time-display">00:00:00</div>
+        <div id="time-display">00:00:00:00</div>
         <div class="controls">
             <button id="start-btn" class="btn">Start</button>
             <button id="stop-btn" class="btn" disabled>Stop</button>
@@ -494,23 +494,23 @@ if ('serviceWorker' in navigator) {
         const resetBtn = document.getElementById('reset-btn');
 
         function formatTime(time) {
-            let diffInHrs = time / 3600000;
-            let hh = Math.floor(diffInHrs);
-            
-            let diffInMin = (diffInHrs - hh) * 60;
-            let mm = Math.floor(diffInMin);
-            
-            let diffInSec = (diffInMin - mm) * 60;
-            let ss = Math.floor(diffInSec);
+            let hh = Math.floor(time / 3600000);
+            let rest = time % 3600000;
 
-            let diffInMs = (diffInSec - ss) * 100;
-            let ms = Math.floor(diffInMs);
+            let mm = Math.floor(rest / 60000);
+            rest = rest % 60000;
 
+            let ss = Math.floor(rest / 1000);
+            rest = rest % 1000;
+            
+            let ms = Math.floor(rest / 10);
+
+            let formattedHH = hh.toString().padStart(2, "0");
             let formattedMM = mm.toString().padStart(2, "0");
             let formattedSS = ss.toString().padStart(2, "0");
             let formattedMS = ms.toString().padStart(2, "0");
 
-            return `${formattedMM}:${formattedSS}:${formattedMS}`;
+            return `${formattedHH}:${formattedMM}:${formattedSS}:${formattedMS}`;
         }
 
         function startTimer() {
@@ -541,7 +541,7 @@ if ('serviceWorker' in navigator) {
             isRunning = false;
             clearInterval(timerInterval);
             elapsedTime = 0;
-            display.innerHTML = "00:00:00";
+            display.innerHTML = "00:00:00:00";
             startBtn.disabled = false;
             stopBtn.disabled = true;
         }
