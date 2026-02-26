@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
         :root {
             --bg-color: #ece0a8;
             --bg-angry: #ffcdd2;
+            --bg-furious: #e57373;
             --sclera-color: #ffffff;
             --eye-color: #2c3e50;
             --accent-color: #ff8fa3;
@@ -41,6 +42,10 @@ if ('serviceWorker' in navigator) {
 
         body.angry-mode {
             background-color: var(--bg-angry);
+        }
+
+        body.furious-mode {
+            background-color: var(--bg-furious);
         }
 
         #timer-panel {
@@ -209,6 +214,50 @@ if ('serviceWorker' in navigator) {
 
         #face-container.angry .pupil {
             top: 2px !important;
+        }
+
+        #face-container.furious .eye-wrapper {
+            height: 100px;
+            border-radius: 30% 30% 50% 50%;
+        }
+
+        #face-container.furious .eye-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -10%;
+            width: 120%;
+            height: 60px;
+            background-color: var(--bg-furious);
+            transform: rotate(25deg);
+            z-index: 10;
+            transition: background-color 0.5s ease;
+        }
+
+        #face-container.furious .eye-wrapper.right::before {
+            transform: rotate(-25deg);
+        }
+        
+        #face-container.furious .pupil {
+            top: 0px !important;
+            width: 12px;
+            height: 12px;
+            left: 27px;
+            background-color: #b71c1c; /* Red pupil */
+        }
+
+        #face-container.furious {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
         @media (max-width: 600px) {
@@ -521,8 +570,20 @@ if ('serviceWorker' in navigator) {
 
         function getAngry(message = "何してたの？") {
             face.classList.remove('happy');
-            face.classList.add('angry');
-            body.classList.add('angry-mode');
+            if (isHardMode) {
+                face.classList.add('furious');
+                // Remove angry if it exists, though furious styles should override or coexist
+                face.classList.remove('angry'); 
+                // Also add furious styles to body
+                body.classList.remove('angry-mode');
+                body.classList.add('furious-mode');
+            } else {
+                face.classList.add('angry');
+                face.classList.remove('furious');
+                body.classList.add('angry-mode');
+                body.classList.remove('furious-mode');
+            }
+            
             showBubbleText(message, 4000);
 
             clearTimeout(angryTimeout);
@@ -531,12 +592,14 @@ if ('serviceWorker' in navigator) {
 
         function calmDown() {
             face.classList.remove('angry');
+            face.classList.remove('furious');
             body.classList.remove('angry-mode');
+            body.classList.remove('furious-mode');
             bubble.classList.remove('show');
         }
         
         function blink() {
-            if (face.classList.contains('happy') || face.classList.contains('angry')) {
+            if (face.classList.contains('happy') || face.classList.contains('angry') || face.classList.contains('furious')) {
                 setTimeout(blink, 1000);
                 return;
             }
@@ -560,6 +623,11 @@ if ('serviceWorker' in navigator) {
                 pupils.forEach(pupil => {
                     pupil.style.transform = `translate(0px, -5px)`;
                 });
+            } else if (face.classList.contains('furious')) {
+                // Pupils already positioned by CSS (smaller, centered-ish)
+                pupils.forEach(pupil => {
+                    pupil.style.transform = `translate(0px, 0px)`;
+                });
             } else {
                 const x = (Math.random() - 0.5) * 16;
                 const y = (Math.random() - 0.5) * 24;
@@ -575,7 +643,7 @@ if ('serviceWorker' in navigator) {
         movePupils();
 
         face.addEventListener('click', () => {
-            if (face.classList.contains('angry')) {
+            if (face.classList.contains('angry') || face.classList.contains('furious')) {
                 calmDown();
                 setTimeout(() => {
                     face.classList.add('happy');
