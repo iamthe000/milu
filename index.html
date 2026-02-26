@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="apple-touch-icon" href="icon192x192.png">
+<link rel="icon" href="icon192x192.png">
+<link rel="manifest" href="manifest.json">
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+}
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>milu | 勉強を見守るあなたの相棒</title>
+    <style>
+        :root {
+            --bg-color: #ece0a8;
+            --bg-angry: #ffcdd2;
+            --sclera-color: #ffffff;
+            --eye-color: #2c3e50;
+            --accent-color: #ff8fa3;
+            --panel-bg: rgba(255, 255, 255, 0.6);
+            --text-color: #555;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            touch-action: manipulation;
+            transition: background-color 0.5s ease;
+        }
+
+        body.angry-mode {
+            background-color: var(--bg-angry);
+        }
+
+        #timer-panel {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--panel-bg);
+            padding: 15px 30px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+            z-index: 90;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        #time-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: white;
+            outline: none;
+        }
+
+        #start-btn { background-color: #a8d5e2; }
+        #stop-btn { background-color: #ffaaa5; }
+        #reset-btn { background-color: #d8e2dc; color: #555; }
+
+        .btn:active { transform: scale(0.95); }
+        .btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+        #face-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            cursor: pointer;
+            margin-top: 60px;
+        }
+
+        #bubble {
+            position: absolute;
+            bottom: -90px;
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--text-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-10px) scale(0.8);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 80;
+        }
+
+        #bubble.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        #bubble::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 10px 10px 10px;
+            border-style: solid;
+            border-color: transparent transparent white transparent;
+        }
+
+        .eye-wrapper {
+            width: 90px;
+            height: 130px;
+            background-color: var(--sclera-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .eye {
+            width: 50px;
+            height: 50px;
+            background-color: var(--eye-color);
+            border-radius: 50%;
+            position: relative;
+            transition: opacity 0.2s;
+        }
+
+        .pupil {
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            left: 24px;
+            transition: all 0.3s ease-out;
+            opacity: 0.8;
+        }
+
+        #face-container.happy .eye-wrapper {
+            height: 40px;
+            border-radius: 50% 50% 0 0;
+            background-color: transparent;
+            border-top: 10px solid var(--eye-color);
+            box-shadow: none;
+            overflow: visible;
+        }
+        
+        #face-container.happy .eye {
+            opacity: 0;
+        }
+
+        #face-container.angry .eye-wrapper {
+            height: 110px;
+            border-radius: 40% 40% 50% 50%;
+        }
+
+        #face-container.angry .eye-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -10%;
+            width: 120%;
+            height: 60px;
+            background-color: var(--bg-angry);
+            transform: rotate(15deg);
+            z-index: 10;
+            transition: background-color 0.5s ease;
+        }
+
+        #face-container.angry .eye-wrapper.right::before {
+            transform: rotate(-15deg);
+        }
+
+        #face-container.angry .pupil {
+            top: 2px !important;
+        }
+
+        @media (max-width: 600px) {
+            #face-container { transform: scale(0.7); }
+            #time-display { font-size: 2rem; }
+            #timer-panel { width: 80%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="timer-panel">
+        <div id="time-display">00:00:00</div>
+        <div class="controls">
+            <button id="start-btn" class="btn">Start</button>
+            <button id="stop-btn" class="btn" disabled>Stop</button>
+            <button id="reset-btn" class="btn">Reset</button>
+        </div>
+    </div>
+
+    <div id="face-container">
+        <div class="eye-wrapper left">
+            <div class="eye"><div class="pupil"></div></div>
+        </div>
+        <div class="eye-wrapper right">
+            <div class="eye"><div class="pupil"></div></div>
+        </div>
+        <div id="bubble"></div>
+    </div>
+
+    <script>
+        const body = document.body;
+        const face = document.getElementById('face-container');
+        const eyeWrappers = document.querySelectorAll('.eye-wrapper');
+        const pupils = document.querySelectorAll('.pupil');
+        const bubble = document.getElementById('bubble');
+        
+        let isBlinking = false;
+        let angryTimeout;
+        let bubbleTimeout;
+        let isRunning = false;
+
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden && isRunning) {
+                getAngry();
+            }
+        });
+
+        function showBubbleText(text, duration = 3000) {
+            bubble.innerText = text;
+            bubble.classList.add('show');
+            clearTimeout(bubbleTimeout);
+            bubbleTimeout = setTimeout(() => {
+                bubble.classList.remove('show');
+            }, duration);
+        }
+
+        function getAngry() {
+            face.classList.remove('happy');
+            face.classList.add('angry');
+            body.classList.add('angry-mode');
+            showBubbleText("何してたの？", 4000);
+
+            clearTimeout(angryTimeout);
+            angryTimeout = setTimeout(calmDown, 4000);
+        }
+
+        function calmDown() {
+            face.classList.remove('angry');
+            body.classList.remove('angry-mode');
+            bubble.classList.remove('show');
+        }
+        
+        function blink() {
+            if (face.classList.contains('happy') || face.classList.contains('angry')) {
+                setTimeout(blink, 1000);
+                return;
+            }
+            
+            isBlinking = true;
+            eyeWrappers.forEach(eye => eye.style.height = '4px');
+            setTimeout(() => {
+                eyeWrappers.forEach(eye => eye.style.height = '130px');
+                isBlinking = false;
+            }, 150);
+            
+            setTimeout(blink, Math.random() * 3000 + 2000);
+        }
+        
+        setTimeout(blink, 2000);
+
+        function movePupils() {
+            if (face.classList.contains('happy')) return;
+            
+            if (face.classList.contains('angry')) {
+                pupils.forEach(pupil => {
+                    pupil.style.transform = `translate(0px, -5px)`;
+                });
+            } else {
+                const x = (Math.random() - 0.5) * 16;
+                const y = (Math.random() - 0.5) * 24;
+                
+                pupils.forEach(pupil => {
+                    pupil.style.transform = `translate(${x}px, ${y}px)`;
+                });
+            }
+
+            setTimeout(movePupils, Math.random() * 2000 + 1000);
+        }
+
+        movePupils();
+
+        face.addEventListener('click', () => {
+            if (face.classList.contains('angry')) {
+                calmDown();
+                setTimeout(() => {
+                    face.classList.add('happy');
+                    setTimeout(() => face.classList.remove('happy'), 1500);
+                }, 300);
+            } else {
+                face.classList.add('happy');
+                setTimeout(() => {
+                    face.classList.remove('happy');
+                }, 1500);
+            }
+        });
+
+        let startTime = 0;
+        let elapsedTime = 0;
+        let timerInterval;
+        
+        const display = document.getElementById('time-display');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function formatTime(time) {
+            let diffInHrs = time / 3600000;
+            let hh = Math.floor(diffInHrs);
+            
+            let diffInMin = (diffInHrs - hh) * 60;
+            let mm = Math.floor(diffInMin);
+            
+            let diffInSec = (diffInMin - mm) * 60;
+            let ss = Math.floor(diffInSec);
+
+            let diffInMs = (diffInSec - ss) * 100;
+            let ms = Math.floor(diffInMs);
+
+            let formattedMM = mm.toString().padStart(2, "0");
+            let formattedSS = ss.toString().padStart(2, "0");
+            let formattedMS = ms.toString().padStart(2, "0");
+
+            return `${formattedMM}:${formattedSS}:${formattedMS}`;
+        }
+
+        function startTimer() {
+            isRunning = true;
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                display.innerHTML = formatTime(elapsedTime);
+            }, 10);
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        }
+
+        function stopTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            showBubbleText("休憩？お疲れ様！");
+            face.classList.add('happy');
+            setTimeout(() => {
+                face.classList.remove('happy');
+            }, 3000);
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            display.innerHTML = "00:00:00";
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+    </script>
+</body>
+</html>
