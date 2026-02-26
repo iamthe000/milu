@@ -307,6 +307,35 @@ if ('serviceWorker' in navigator) {
             padding: 10px 40px;
             font-size: 1rem;
         }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0); }
+            80% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes popInCenter {
+            0% { opacity: 0; transform: translateX(-50%) scale(0); }
+            80% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        .anim-pop-face {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+            animation-delay: 0.1s;
+            display: flex;
+            justify-content: center;
+        }
+
+        #timer-panel {
+            animation: popInCenter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+            animation-delay: 0.3s;
+        }
+
+        #usage-btn {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+            animation-delay: 0.5s;
+        }
     </style>
 </head>
 <body>
@@ -322,14 +351,16 @@ if ('serviceWorker' in navigator) {
         </div>
     </div>
 
-    <div id="face-container">
-        <div class="eye-wrapper left">
-            <div class="eye"><div class="pupil"></div></div>
+    <div class="anim-pop-face">
+        <div id="face-container">
+            <div class="eye-wrapper left">
+                <div class="eye"><div class="pupil"></div></div>
+            </div>
+            <div class="eye-wrapper right">
+                <div class="eye"><div class="pupil"></div></div>
+            </div>
+            <div id="bubble"></div>
         </div>
-        <div class="eye-wrapper right">
-            <div class="eye"><div class="pupil"></div></div>
-        </div>
-        <div id="bubble"></div>
     </div>
 
     <div id="usage-modal" class="modal-overlay">
