@@ -296,8 +296,6 @@ if ('serviceWorker' in navigator) {
             display: flex;
             gap: 10px;
             z-index: 1000;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
-            animation-delay: 0.5s;
         }
 
         #usage-btn, #hard-mode-btn {
@@ -307,6 +305,15 @@ if ('serviceWorker' in navigator) {
             padding: 5px 15px;
             font-size: 0.8rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+        }
+
+        #usage-btn {
+            animation-delay: 0.5s;
+        }
+
+        #hard-mode-btn {
+            animation-delay: 0.7s;
         }
 
         #usage-btn:hover, #hard-mode-btn:hover {
