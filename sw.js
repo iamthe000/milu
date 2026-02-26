@@ -1,4 +1,4 @@
-var CACHE_NAME = 'milu';
+var CACHE_NAME = 'milu-v2';
 var urlsToCache = [
     '/apps/pwa/',
     '/apps/pwa/index.html'
