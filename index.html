@@ -48,6 +48,13 @@ if ('serviceWorker' in navigator) {
             background-color: var(--bg-furious);
         }
 
+        body.dark-mode {
+            --bg-color: #3d423d;
+            --sclera-color: #d3d3d3;
+            --text-color: #f0f0f0;
+            --panel-bg: rgba(60, 60, 60, 0.6);
+        }
+
         #timer-panel {
             position: absolute;
             top: 100px;
@@ -298,7 +305,7 @@ if ('serviceWorker' in navigator) {
             z-index: 1000;
         }
 
-        #usage-btn, #hard-mode-btn {
+        #usage-btn, #hard-mode-btn, #theme-btn {
             background-color: rgba(255, 255, 255, 0.8);
             color: var(--accent-color);
             border: 2px solid var(--accent-color);
@@ -316,18 +323,22 @@ if ('serviceWorker' in navigator) {
             animation-delay: 0.7s;
         }
 
-        #usage-btn:hover, #hard-mode-btn:hover {
+        #theme-btn {
+            animation-delay: 0.9s;
+        }
+
+        #usage-btn:hover, #hard-mode-btn:hover, #theme-btn:hover {
             background-color: var(--accent-color);
             color: white;
             transform: scale(1.05);
         }
 
-        #hard-mode-btn {
+        #hard-mode-btn, #theme-btn {
             border-color: #555;
             color: #555;
         }
         
-        #hard-mode-btn:hover {
+        #hard-mode-btn:hover, #theme-btn:hover {
             background-color: #555;
             color: white;
         }
@@ -476,6 +487,7 @@ if ('serviceWorker' in navigator) {
     <div class="header-controls">
         <button id="usage-btn" class="btn">使い方</button>
         <button id="hard-mode-btn" class="btn">ハードモード</button>
+        <button id="theme-btn" class="btn">ダークモード</button>
     </div>
 
     <div id="timer-panel">
@@ -762,6 +774,23 @@ if ('serviceWorker' in navigator) {
             } else {
                 hardModeBtn.classList.remove('active');
                 face.classList.remove('staring');
+            }
+        });
+
+        const themeBtn = document.getElementById('theme-btn');
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        let isDarkMode = false;
+
+        themeBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeBtn.innerText = "通常モード";
+                metaThemeColor.setAttribute('content', '#3d423d');
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeBtn.innerText = "ダークモード";
+                metaThemeColor.setAttribute('content', '#ece0a8');
             }
         });
 
