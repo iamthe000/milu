@@ -327,20 +327,22 @@ if ('serviceWorker' in navigator) {
             animation-delay: 0.9s;
         }
 
-        #usage-btn:hover, #hard-mode-btn:hover, #theme-btn:hover {
-            background-color: var(--accent-color);
-            color: white;
-            transform: scale(1.05);
+        @media (hover: hover) {
+            #usage-btn:hover, #hard-mode-btn:hover, #theme-btn:hover {
+                background-color: var(--accent-color);
+                color: white;
+                transform: scale(1.05);
+            }
+
+            #hard-mode-btn:hover, #theme-btn:hover {
+                background-color: #555;
+                color: white;
+            }
         }
 
         #hard-mode-btn, #theme-btn {
             border-color: #555;
             color: #555;
-        }
-        
-        #hard-mode-btn:hover, #theme-btn:hover {
-            background-color: #555;
-            color: white;
         }
 
         #hard-mode-btn.active {
@@ -653,6 +655,10 @@ if ('serviceWorker' in navigator) {
         movePupils();
 
         face.addEventListener('click', () => {
+            if (isHardMode) {
+                getAngry("集中しろ！");
+                return;
+            }
             if (face.classList.contains('angry') || face.classList.contains('furious')) {
                 calmDown();
                 setTimeout(() => {
