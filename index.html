@@ -482,6 +482,76 @@ if ('serviceWorker' in navigator) {
             background-color: #ffaaa5;
             color: white;
         }
+
+        .pwa-popup-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid var(--accent-color);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+            opacity: 0;
+            pointer-events: none;
+            width: 80%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .pwa-popup-container.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .pwa-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .pwa-content.hidden {
+            display: none;
+        }
+
+        .pwa-content p {
+            margin: 0;
+            color: var(--text-color);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .pwa-close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .pwa-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pwa-buttons .btn {
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -524,6 +594,20 @@ if ('serviceWorker' in navigator) {
                 <li><span class="bunsetsu">背景を</span><span class="bunsetsu">タップしたら</span><span class="bunsetsu">夜も安心な</span><span class="bunsetsu">ダークモードに</span><span class="bunsetsu">なるよ</span></li>
             </ul>
             <button id="close-modal-btn" class="btn">わかった！</button>
+        </div>
+    </div>
+
+    <div id="pwa-popup" class="pwa-popup-container">
+        <div id="pwa-guide" class="pwa-content">
+            <button id="pwa-close-btn" class="pwa-close-btn">×</button>
+            <p>miluの画面をフルサイズで体験しませんか？<br>ホーム画面に追加して使ってみてね！</p>
+        </div>
+        <div id="pwa-confirm" class="pwa-content hidden">
+            <p>次回からこの表示を消しますか？</p>
+            <div class="pwa-buttons">
+                <button id="pwa-yes-btn" class="btn confirm">はい</button>
+                <button id="pwa-no-btn" class="btn cancel">いいえ</button>
+            </div>
         </div>
     </div>
 
@@ -822,6 +906,40 @@ if ('serviceWorker' in navigator) {
         closeModalBtn.addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
+        });
+
+        const pwaPopup = document.getElementById('pwa-popup');
+        const pwaGuide = document.getElementById('pwa-guide');
+        const pwaConfirm = document.getElementById('pwa-confirm');
+        const pwaCloseBtn = document.getElementById('pwa-close-btn');
+        const pwaYesBtn = document.getElementById('pwa-yes-btn');
+        const pwaNoBtn = document.getElementById('pwa-no-btn');
+
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const isPwaHidden = localStorage.getItem('milu_pwa_hidden') === 'true';
+
+        if (!isStandalone && !isPwaHidden) {
+            setTimeout(() => {
+                pwaPopup.classList.add('show');
+            }, 2000);
+        }
+
+        pwaCloseBtn.addEventListener('click', () => {
+            pwaGuide.classList.add('hidden');
+            pwaConfirm.classList.remove('hidden');
+        });
+
+        pwaYesBtn.addEventListener('click', () => {
+            localStorage.setItem('milu_pwa_hidden', 'true');
+            pwaPopup.classList.remove('show');
+        });
+
+        pwaNoBtn.addEventListener('click', () => {
+            pwaPopup.classList.remove('show');
+            setTimeout(() => {
+                pwaGuide.classList.remove('hidden');
+                pwaConfirm.classList.add('hidden');
+            }, 500);
         });
 
     </script>
