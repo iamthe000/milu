@@ -812,6 +812,8 @@ if ('serviceWorker' in navigator) {
             }, 10);
             startBtn.disabled = true;
             stopBtn.disabled = false;
+            
+            pwaPopup.classList.remove('show');
         }
 
         function stopTimer() {
