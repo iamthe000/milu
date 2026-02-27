@@ -539,11 +539,24 @@ if ('serviceWorker' in navigator) {
         const eyeWrappers = document.querySelectorAll('.eye-wrapper');
         const pupils = document.querySelectorAll('.pupil');
         const bubble = document.getElementById('bubble');
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         
         let isBlinking = false;
         let angryTimeout;
         let bubbleTimeout;
         let isRunning = false;
+
+        function updateThemeColor() {
+            if (body.classList.contains('furious-mode')) {
+                metaThemeColor.setAttribute('content', '#e57373');
+            } else if (body.classList.contains('angry-mode')) {
+                metaThemeColor.setAttribute('content', '#ffcdd2');
+            } else if (body.classList.contains('dark-mode')) {
+                metaThemeColor.setAttribute('content', '#3d423d');
+            } else {
+                metaThemeColor.setAttribute('content', '#ece0a8');
+            }
+        }
 
         document.addEventListener("visibilitychange", () => {
             if (!document.hidden && isRunning) {
@@ -585,6 +598,7 @@ if ('serviceWorker' in navigator) {
             
             showBubbleText(message, 4000);
 
+            updateThemeColor();
             clearTimeout(angryTimeout);
             angryTimeout = setTimeout(calmDown, 4000);
         }
@@ -598,6 +612,7 @@ if ('serviceWorker' in navigator) {
             body.classList.remove('angry-mode');
             body.classList.remove('furious-mode');
             bubble.classList.remove('show');
+            updateThemeColor();
         }
         
         function blink() {
@@ -778,7 +793,6 @@ if ('serviceWorker' in navigator) {
             }
         });
 
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         let isDarkMode = false;
 
         document.body.addEventListener('click', (e) => {
@@ -790,11 +804,10 @@ if ('serviceWorker' in navigator) {
             isDarkMode = !isDarkMode;
             if (isDarkMode) {
                 document.body.classList.add('dark-mode');
-                metaThemeColor.setAttribute('content', '#3d423d');
             } else {
                 document.body.classList.remove('dark-mode');
-                metaThemeColor.setAttribute('content', '#ece0a8');
             }
+            updateThemeColor();
         });
 
         const closeModal = () => {
